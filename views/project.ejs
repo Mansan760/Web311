@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= project.title %> - WEB322</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <%- include('partials/navbar', { page: '/solutions/projects' }) %>
+
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4"><%= project.title %></h1>
+    <p><strong>Sector:</strong> <%= project.sector %></p>
+    <p><strong>Summary:</strong> <%= project.summary %></p>
+
+    <!-- Feature Image Section -->
+    <% if (project.feature_img_url) { %>
+      <div class="my-4">
+        <img src="<%= project.feature_img_url %>" alt="Feature Image" class="max-w-full h-auto">
+      </div>
+    <% } %>
+
+    <!-- Project Details Section -->
+    <p><strong>Introduction:</strong> <%= project.intro_short %></p>
+    <p><strong>Impact:</strong> <%= project.impact %></p>
+    <p><strong>Full Introduction:</strong> <%= project.intro_full %></p>
+
+    <!-- Quote Section -->
+    <div id="quote-container" class="container mx-auto p-4 mt-8">
+      <p><strong>Quote:</strong></p>
+      <p id="quote-text">Loading quote...</p>
+      <p id="quote-author"></p>
+    </div>
+
+    <!-- Back to Projects Link -->
+    <div class="mt-4">
+      <a href="/solutions/projects" class="btn btn-primary">Back to Projects</a>
+    </div>
+  </div>
+
+  <script src="/js/script.js"></script>
+</body>
+</html>

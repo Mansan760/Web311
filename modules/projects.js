@@ -3,53 +3,55 @@ const sectorData = require("../data/sectorData");
 
 let projects = [];
 
-function Initialize() {
-  return new Promise((resolve, reject) => {
-    try {
-      projects = [];
-      projectData.forEach(project => {
-        const matchingSector = sectorData.find(sector => sector.id === project.sector_id);
-        const sectorName = matchingSector ? matchingSector.sector_name : "";
-        projects.push({ ...project, sector: sectorName });
-      });
-      resolve();
-    } catch (error) {
-      reject("Error initializing projects: " + error);
-    }
-  });
+// Initialize the project data and map sector names to the projects.
+async function Initialize() {
+  try {
+    projects = [];
+    projectData.forEach(project => {
+      const matchingSector = sectorData.find(sector => sector.id === project.sector_id);
+      const sectorName = matchingSector ? matchingSector.sector_name : "";
+      projects.push({ ...project, sector: sectorName });
+    });
+  } catch (error) {
+    throw new Error("Error initializing projects: " + error);
+  }
 }
 
+// Get all projects
 function getAllProjects() {
-  return new Promise((resolve, reject) => {
-    if (projects.length > 0) {
-      resolve(projects);
-    } else {
-      reject("Projects not initialized or empty");
-    }
-  });
+  if (projects.length > 0) {
+    return projects;  // Return the projects directly as this is synchronous.
+  }
+  throw new Error("Projects not initialized or empty");
 }
 
+// Get project by ID
 function getProjectById(projectId) {
-  return new Promise((resolve, reject) => {
-    const project = projects.find(project => project.id === projectId);
-    if (project) {
-      resolve(project);
-    } else {
-      reject(`Unable to find requested project with id: ${projectId}`);
-    }
-  });
+  const project = projects.find(project => project.id === projectId);
+  if (project) {
+    return project;  // Return the project directly.
+  }
+  throw new Error(`Unable to find requested project with id: ${projectId}`); // Throw an error if not found
 }
 
+
+// Get projects by sector
 function getProjectsBySector(sector) {
-  return new Promise((resolve, reject) => {
-    const searchTerm = sector.toLowerCase();
-    const filteredProjects = projects.filter(project => project.sector.toLowerCase().includes(searchTerm));
-    if (filteredProjects.length > 0) {
-      resolve(filteredProjects);
-    } else {
-      reject(`Unable to find requested projects for sector: ${sector}`);
-    }
+  const searchTerm = sector.toLowerCase();
+  const filteredProjects = projects.filter(project => project.sector.toLowerCase().includes(searchTerm));
+  if (filteredProjects.length > 0) {
+    return filteredProjects;  // Return the filtered projects.
+  }
+  throw new Error(`Unable to find requested projects for sector: ${sector}`);
+}
+
+// Handle errors (for 404 routes)
+function handleError(errorMessage, res) {
+  res.status(404).render("404", {
+    studentName: "Mansan Silwal",
+    studentId: "132326232",
+    message: errorMessage,
   });
 }
 
-module.exports = { Initialize, getAllProjects, getProjectById, getProjectsBySector };
+module.exports = { Initialize, getAllProjects, getProjectById, getProjectsBySector, handleError };

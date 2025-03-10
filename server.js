@@ -1,17 +1,18 @@
 /********************************************************************************
-*  WEB322 – Assignment 03
+*  WEB322 – Assignment 04
 * 
 *  I declare that this assignment is my own work in accordance with Seneca's
 *  Academic Integrity Policy:
 * 
 *  https://www.senecapolytechnic.ca/about/policies/academic-integrity-policy.html
 * 
-*  Name: Mansan Silwal Student ID: 132326232 Date: 16th Feb,2025
+*  Name: Mansan Silwal Student ID: 132326232 Date: 9th March, 2025
 *
 ********************************************************************************/
 
 const express = require("express");
 const path = require("path");
+const fetch = require("node-fetch");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -20,176 +21,126 @@ const projectData = require("./modules/projects");
 const studentName = "Mansan Silwal";
 const studentId = "132326232";
 
-// Serve static files from the public directory
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
-// Route for Home page (index)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "home.html"));
-});
+app.get("/", async (req, res) => {
+  try {
+    const response = await fetch("https://dummyjson.com/quotes/random");
+    const data = await response.json();
+    const randomQuote = data.quote;
 
-// Route for About page
-app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "about.html"));
-});
-
-// Route for solutions/projects
-app.get("/solutions/projects", (req, res) => {
-  const sector = req.query.sector;
-
-  // If a specific sector is provided
-  if (sector) {
-    switch (sector) {
-      // Hardcode data for Plastic Bags
-      case "Plastic Bags":
-        return res.json({
-          studentName,
-          studentId,
-          timestamp: new Date().toISOString(),
-          projects: [
-            {
-              id: 101,
-              title: "Reduce Single-Use Plastic Bag Project",
-              sector: "Plastic Bags",
-              description: "Encourage the use of reusable bags in local stores."
-            },
-            {
-              id: 102,
-              title: "Plastic Bag Recycling Initiative",
-              sector: "Plastic Bags",
-              description: "Collect and recycle plastic bags to reduce waste."
-            }
-          ]
-        });
-
-      // Hardcode data for Carbon Gases
-      case "Carbon Gases":
-        return res.json({
-          studentName,
-          studentId,
-          timestamp: new Date().toISOString(),
-          projects: [
-            {
-              id: 201,
-              title: "Carbon Capture Program",
-              sector: "Carbon Gases",
-              description: "Implement technology to capture and store CO2 emissions."
-            },
-            {
-              id: 202,
-              title: "Greenhouse Gas Reduction",
-              sector: "Carbon Gases",
-              description: "Work with industries to lower carbon footprints."
-            }
-          ]
-        });
-
-      // Hardcode data for Plantation
-      case "Plantation":
-        return res.json({
-          studentName,
-          studentId,
-          timestamp: new Date().toISOString(),
-          projects: [
-            {
-              id: 301,
-              title: "Urban Tree Planting",
-              sector: "Plantation",
-              description: "Plant trees in urban areas to improve air quality."
-            },
-            {
-              id: 302,
-              title: "Community Garden Initiative",
-              sector: "Plantation",
-              description: "Promote local gardening and planting for a greener community."
-            }
-          ]
-        });
-
-      // Otherwise, use your existing projectData logic
-      default:
-        projectData.getProjectsBySector(sector)
-          .then((projects) => {
-            res.json({
-              studentName,
-              studentId,
-              timestamp: new Date().toISOString(),
-              projects
-            });
-          })
-          .catch((err) => {
-            res.status(404).json({
-              studentName,
-              studentId,
-              timestamp: new Date().toISOString(),
-              error: err
-            });
-          });
-        return; // Make sure we don't continue past this point
-    }
-
-  } else {
-    // No sector provided; return all projects
-    projectData.getAllProjects()
-      .then((projects) => {
-        res.json({
-          studentName,
-          studentId,
-          timestamp: new Date().toISOString(),
-          projects
-        });
-      })
-      .catch((err) => {
-        res.status(500).json({
-          studentName,
-          studentId,
-          timestamp: new Date().toISOString(),
-          error: err
-        });
-      });
+    res.render("home", {
+      studentName,
+      studentId,
+      randomQuote,
+    });
+  } catch (error) {
+    res.render("home", {
+      studentName,
+      studentId,
+      randomQuote: "Error fetching quote",
+    });
   }
 });
 
-// Route for individual project by id
-app.get("/solutions/projects/:id", (req, res) => {
+app.get("/about", (req, res) => {
+  res.render("about", { studentName, studentId });
+});
+
+app.get("/solutions/projects", async (req, res) => {
+  const sector = req.query.sector;
+
+  try {
+    let projects;
+    
+    if (sector) {
+      switch (sector) {
+        case "Plastic Bags":
+          projects = [
+            { id: 101, title: "Reduce Single-Use Plastic Bag Project", sector, description: "Encourage the use of reusable bags in local stores." },
+            { id: 102, title: "Plastic Bag Recycling Initiative", sector, description: "Collect and recycle plastic bags to reduce waste." }
+          ];
+          break;
+
+        case "Carbon Gases":
+          projects = [
+            { id: 201, title: "Carbon Capture Program", sector, description: "Implement technology to capture and store CO2 emissions." },
+            { id: 202, title: "Greenhouse Gas Reduction", sector, description: "Work with industries to lower carbon footprints." }
+          ];
+          break;
+
+        case "Plantation":
+          projects = [
+            { id: 301, title: "Urban Tree Planting", sector, description: "Plant trees in urban areas to improve air quality." },
+            { id: 302, title: "Community Garden Initiative", sector, description: "Promote local gardening and planting for a greener community." }
+          ];
+          break;
+
+        default:
+          projects = await projectData.getProjectsBySector(sector);
+      }
+    } else {
+      projects = await projectData.getAllProjects();
+    }
+
+    res.render("projects", {
+      studentName,
+      studentId,
+      projects,
+      sector: sector || "All Sectors",
+    });
+  } catch (err) {
+    res.status(500).render("error", {
+      studentName,
+      studentId,
+      error: err.message,
+    });
+  }
+});
+
+app.get("/solutions/projects/:id", async (req, res) => {
   const projectId = parseInt(req.params.id, 10);
 
-  projectData.getProjectById(projectId)
-    .then((project) => {
-      res.json({
-        studentName,
-        studentId,
-        timestamp: new Date().toISOString(),
-        project
-      });
-    })
-    .catch((err) => {
-      res.status(404).json({
-        studentName,
-        studentId,
-        timestamp: new Date().toISOString(),
-        error: err
-      });
+  try {
+    const project = await projectData.getProjectById(projectId);
+
+    const response = await fetch("https://dummyjson.com/quotes/random");
+    const data = await response.json();
+    const randomQuote = data.quote;
+
+    res.render("project", {
+      studentName,
+      studentId,
+      project,
+      randomQuote,
     });
+  } catch (err) {
+    // Using the handleError function from projects.js to handle project not found case
+    projectData.handleError(`Project with ID ${projectId} not found`, res);
+  }
 });
 
-// Custom 404 error page
 app.get("*", (req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "views", "404.html"));
+  res.status(404).render("404", {
+    studentName,
+    studentId,
+    message: "Sorry, we couldn't find what you're looking for.",
+  });
 });
 
-// POST route for handling requests at /post-request
 app.post("/post-request", (req, res) => {
   res.json({
     studentName,
     studentId,
     timestamp: new Date().toISOString(),
-    requestBody: req.body
+    requestBody: req.body,
   });
 });
 
-// Initialize project data and start the server
 projectData.Initialize()
   .then(() => {
     app.listen(port, () => {
