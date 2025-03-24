@@ -1,0 +1,37 @@
+<!-- views/500.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 - Server Error</title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <div class="container mx-auto p-4 text-center">
+    <div class="alert alert-error max-w-2xl mx-auto">
+      <div class="flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+             class="w-6 h-6 mx-2 stroke-current">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <h1 class="text-4xl font-bold mb-4">500 - Server Error</h1>
+        <p class="py-4"><%= message %></p>
+        <p class="text-sm">
+          Student: <%= studentName %> (<%= studentId %>)<br>
+          Timestamp: <%= new Date().toLocaleString() %>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <a href="/" class="btn btn-primary">Return to Home</a>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
