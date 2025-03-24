@@ -178,5 +178,5 @@ module.exports = {
   getAllSectors,
   addProject,
   updateProject,
-  deleteProject  // Added for Part 5
+  deleteProject  
 };
